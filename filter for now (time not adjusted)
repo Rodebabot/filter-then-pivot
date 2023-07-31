@@ -1,0 +1,48 @@
+import pandas as pd
+import ipywidgets as widgets
+from IPython.display import display
+from datetime import datetime
+
+# Function to filter DataFrame based on user-selected values
+def filter_data(columns, values):
+    filtered_df = df.copy()
+    for col, val in zip(columns, values):
+        if len(val) > 0:
+            filtered_df = filtered_df[filtered_df[col].isin(val)]
+    return filtered_df
+
+# Get unique values for each column
+unique_values = {col: df[col].unique().tolist() for col in df.columns}
+
+# Create SelectMultiple widgets for each column
+multiselects = {col: widgets.SelectMultiple(options=unique_values[col], description=col) for col in df.columns}
+
+# Create button widget to trigger filtering and export
+button = widgets.Button(description="Filter Data and Export")
+
+# Function to handle button click event
+def on_button_click(b):
+    selected_columns = [col for col, multiselect in multiselects.items()]
+    selected_values = [multiselect.value for multiselect in multiselects.values()]
+    filtered_df = filter_data(selected_columns, selected_values)
+
+    # Export the filtered DataFrame to a CSV file
+    timestamp = datetime.now().strftime('%Y%m%d')
+    file_name = f"deb_{timestamp}.csv"
+    filtered_df.to_csv(file_name, index=False)
+    print(f"Filtered data has been exported to '{file_name}'.")
+
+# Attach the button click event
+button.on_click(on_button_click)
+
+# Display multiselects and button
+print("Select the columns to filter:")
+
+# Import data from Excel file
+file_path = r'C:\Users\Admin\Desktop\tkinter.xlsx'  # Replace with the path to your Excel file
+df = pd.read_excel(file_path, engine='openpyxl')
+
+for col, multiselect in multiselects.items():
+    display(multiselect)
+
+display(button)

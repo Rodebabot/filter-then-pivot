@@ -1,0 +1,40 @@
+import pandas as pd
+
+def apply_pivot(df, pivot_columns, agg_function):
+    pivot_table = df.pivot_table(index=pivot_columns, values=df.columns[6], aggfunc=agg_function)
+    return pivot_table
+
+if __name__ == "__main__":
+    file_path = input("Enter the file path of the data file (CSV or Excel): ")
+    file_type = file_path.split('.')[-1].lower()
+
+    if file_type not in ['csv', 'xlsx', 'xls']:
+        print("Error: Unsupported file format. Please provide a CSV or Excel file.")
+    else:
+        if file_type == 'csv':
+            df = pd.read_csv(file_path)
+        else:
+            df = pd.read_excel(file_path)
+
+        print("Available columns in the DataFrame:")
+        for idx, column in enumerate(df.columns):
+            print(f"{idx}: {column}")
+
+        pivot_input = input("Enter the column indexes to use for pivot (comma-separated): ")
+        pivot_indices = [int(idx.strip()) for idx in pivot_input.split(",")]
+
+        invalid_indices = [idx for idx in pivot_indices if idx not in range(len(df.columns))]
+        if invalid_indices:
+            print(f"Error: Invalid column indexes {', '.join(map(str, invalid_indices))}.")
+        else:
+            pivot_columns = [df.columns[idx] for idx in pivot_indices]
+
+            print("Available aggregation functions: mean, sum, min, max, count")
+            agg_function = input("Enter the aggregation function to apply: ")
+
+            if agg_function not in ['mean', 'sum', 'min', 'max', 'count']:
+                print(f"Error: Invalid aggregation function '{agg_function}'.")
+            else:
+                pivot_table = apply_pivot(df, pivot_columns, agg_function)
+                print("\nPivot Table:")
+                print(pivot_table)
